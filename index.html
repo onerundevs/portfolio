@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Onerun</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%230ea5e9' opacity='0.15'/%3E%3Ccircle cx='32' cy='32' r='30' fill='none' stroke='%230ea5e9' stroke-width='2' opacity='0.5'/%3E%3Ctext x='32' y='40' font-family='Georgia%2C serif' font-size='26' font-style='italic' font-weight='400' fill='%230ea5e9' text-anchor='middle' letter-spacing='-1'>o%2F%3C%2Ftext%3E%3C%2Fsvg%3E"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap"/>
@@ -554,67 +555,74 @@ document.querySelectorAll('.card').forEach(card => {
 });
 
 // ── GitHub live stats ──────────────────────────────────────────────────────────
-const GH_USER = 'onerun';
-const GH_API        = `https://api.github.com/users/${GH_USER}`;
+const GH_USER      = 'onerun';
+const GH_API       = `https://api.github.com/users/${GH_USER}`;
+const GH_REPOS_API = `https://api.github.com/users/${GH_USER}/repos?sort=created&direction=desc&per_page=1`;
 
 const elFollowers = document.getElementById('stat-followers');
 const elRepos     = document.getElementById('stat-repos');
 const elLastRepo  = document.getElementById('stat-lastrepo');
 
-// Animate a number counting up to a target value
+// Track last-known values so we don't re-animate unchanged numbers
+let _knownFollowers = null;
+let _knownRepos     = null;
+let _knownLastRepo  = null;
+
+// Clear the loading shimmer and set up for numbers the first time
+function clearShimmer(el) {
+  if (el.querySelector('.stat-loading')) el.innerHTML = '0';
+}
+
 function animateCount(el, target) {
-  const current = parseInt(el.dataset.current || '0', 10);
+  clearShimmer(el);
+  const current = parseInt(el.textContent || '0', 10);
   if (current === target) return;
-  const diff     = target - current;
-  const steps    = Math.min(Math.abs(diff), 20);
-  const stepVal  = diff / steps;
-  const interval = 60;
-  let count = current;
-  let step  = 0;
+  const steps   = Math.max(1, Math.min(Math.abs(target - current), 24));
+  const stepVal = (target - current) / steps;
+  let count = current, step = 0;
   const ticker = setInterval(() => {
     step++;
     count += stepVal;
     el.textContent = Math.round(step < steps ? count : target);
-    if (step >= steps) { clearInterval(ticker); el.dataset.current = target; }
-  }, interval);
+    if (step >= steps) clearInterval(ticker);
+  }, 50);
 }
 
-// Crossfade text (for repo name)
 function fadeText(el, text) {
+  clearShimmer(el);
   if (el.textContent === text) return;
+  el.style.transition = 'opacity .25s';
   el.style.opacity = '0';
-  setTimeout(() => {
-    el.textContent = text;
-    el.style.opacity = '1';
-    el.dataset.current = text;
-  }, 300);
-}
-
-// Relative time formatter
-function timeAgo(dateStr) {
-  const secs = Math.floor((Date.now() - new Date(dateStr)) / 1000);
-  if (secs < 60)               return secs + 's ago';
-  if (secs < 3600)             return Math.floor(secs / 60) + 'm ago';
-  if (secs < 86400)            return Math.floor(secs / 3600) + 'h ago';
-  if (secs < 86400 * 30)       return Math.floor(secs / 86400) + 'd ago';
-  if (secs < 86400 * 365)      return Math.floor(secs / (86400 * 30)) + 'mo ago';
-  return Math.floor(secs / (86400 * 365)) + 'y ago';
+  setTimeout(() => { el.textContent = text; el.style.opacity = '1'; }, 260);
 }
 
 async function fetchStats() {
   try {
-    const userRes = await fetch(GH_API, { headers: { 'Accept': 'application/vnd.github+json' } });
+    const [userRes, repoRes] = await Promise.all([
+      fetch(GH_API,       { headers: { 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' } }),
+      fetch(GH_REPOS_API, { headers: { 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' } }),
+    ]);
 
     if (userRes.ok) {
       const user = await userRes.json();
-      animateCount(elFollowers, user.followers ?? 0);
-      animateCount(elRepos,     user.public_repos ?? 0);
-      if (user.updated_at) fadeText(elLastRepo, timeAgo(user.updated_at));
+      if (user.followers   !== _knownFollowers) { _knownFollowers = user.followers;    animateCount(elFollowers, user.followers    ?? 0); }
+      if (user.public_repos !== _knownRepos)    { _knownRepos     = user.public_repos; animateCount(elRepos,     user.public_repos ?? 0); }
+    }
+
+    if (repoRes.ok) {
+      const repos = await repoRes.json();
+      if (Array.isArray(repos) && repos[0]) {
+        const name = repos[0].name;
+        if (name !== _knownLastRepo) { _knownLastRepo = name; fadeText(elLastRepo, name); }
+      }
     }
   } catch (err) {
     console.warn('GitHub API fetch failed:', err);
   }
 }
+
+fetchStats();
+setInterval(fetchStats, 5000);
 
 // ── Typewriter ─────────────────────────────────────────────────────────────────
 (function () {
