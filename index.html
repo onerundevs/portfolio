@@ -546,7 +546,10 @@ function showBar() {
 }
 
 // ── Scroll to top ──────────────────────────────────────────────────────────────
-function goTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function goTop() {
+  document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+  document.body.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 // ── Project cards → GitHub ─────────────────────────────────────────────────────
 document.querySelectorAll('.card').forEach(card => {
