@@ -1,8 +1,8 @@
 # onerun
 
-[![profile views](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Fusers%2Fonerun&query=followers&label=followers&color=e0f2fe&labelColor=bae6fd&style=flat-square&logo=github&logoColor=0ea5e9)](https://github.com/onerun)
-[![repos](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Fusers%2Fonerun&query=public_repos&label=repos&color=e0f2fe&labelColor=bae6fd&style=flat-square&logo=git&logoColor=0ea5e9)](https://github.com/onerun?tab=repositories)
-[![open source](https://img.shields.io/badge/open%20source-always-0ea5e9?style=flat-square&labelColor=bae6fd&logo=opensourceinitiative&logoColor=0ea5e9)](https://github.com/onerun)
+[![profile views](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Fusers%2Fonerun&query=followers&label=followers&color=e0f2fe&labelColor=bae6fd&style=flat-square&logo=github&logoColor=0ea5e9)](https://github.com/onerundevs)
+[![repos](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Fusers%2Fonerun&query=public_repos&label=repos&color=e0f2fe&labelColor=bae6fd&style=flat-square&logo=git&logoColor=0ea5e9)](https://github.com/onerundevs?tab=repositories)
+[![open source](https://img.shields.io/badge/open%20source-always-0ea5e9?style=flat-square&labelColor=bae6fd&logo=opensourceinitiative&logoColor=0ea5e9)](https://github.com/onerundevs)
 
 ---
 
@@ -39,7 +39,7 @@ Developer. Clean code. Minimal surface area. Open-source whenever possible.
 
 | | repo | description |
 |---|---|---|
-| [![core](https://img.shields.io/badge/core-e0f2fe?style=flat-square&labelColor=bae6fd&logo=bolt&logoColor=0ea5e9)](https://github.com/onerun) | [onerun/core](https://github.com/onerun) | Lightweight runtime utilities built for speed and simplicity |
+| [![core](https://img.shields.io/badge/core-e0f2fe?style=flat-square&labelColor=bae6fd&logo=bolt&logoColor=0ea5e9)](https://github.com/onerun) | [onerundevs/portfolio](https://github.com/onerundevs/portfolio) | Lightweight runtime utilities built for speed and simplicity |
 | [![cli](https://img.shields.io/badge/cli-e0f2fe?style=flat-square&labelColor=bae6fd&logo=windowsterminal&logoColor=0ea5e9)](https://github.com/onerun) | CLI Tools | Command-line utilities that do one thing exceptionally well |
 | [![dots](https://img.shields.io/badge/dots-e0f2fe?style=flat-square&labelColor=bae6fd&logo=files&logoColor=0ea5e9)](https://github.com/onerun) | Configs & Dotfiles | A carefully maintained set of configs for a distraction-free dev environment |
 | [![lab](https://img.shields.io/badge/lab-e0f2fe?style=flat-square&labelColor=bae6fd&logo=flask&logoColor=0ea5e9)](https://github.com/onerun) | Experiments | Side projects, prototypes, and things built purely out of curiosity |
