@@ -13,7 +13,20 @@
 /* ── Reset ──────────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
-body { font-family: 'Geist', sans-serif; font-weight: 400; min-height: 100vh; transition: background 0.35s, color 0.35s; overflow-x: hidden; }
+
+/* Disable selection + right-click everywhere except <p> */
+* {
+  -webkit-user-select: none;
+  user-select: none;
+}
+p {
+  -webkit-user-select: text;
+  user-select: text;
+}
+/* Sky-blue selection colour on <p> */
+p::selection { background: rgba(14,165,233,.22); color: inherit; }
+p *::selection { background: rgba(14,165,233,.22); color: inherit; }
+body { font-family: 'Geist', sans-serif; font-weight: 400; min-height: 100vh; transition: background 0.35s, color 0.35s; }
 a { text-decoration: none; color: inherit; }
 button { cursor: pointer; font-family: inherit; border: none; background: none; }
 ::-webkit-scrollbar { width: 4px; }
@@ -97,7 +110,7 @@ body { background: var(--bg); color: var(--tx); }
 [data-theme="dark"] .orb-b { background: radial-gradient(circle, rgba(125,211,252,.08) 0%, rgba(56,189,248,.02) 58%, transparent 80%); }
 
 /* ── Wrapper ─────────────────────────────────────────────────────────────────── */
-#wrapper { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 0 28px 140px; }
+#wrapper { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 0 28px 140px; overflow-x: hidden; }
 
 /* ── Header ─────────────────────────────────────────────────────────────────── */
 header {
@@ -545,7 +558,10 @@ function showBar() {
   bar.classList.remove('hidden');
 }
 
-// ── Scroll to top ──────────────────────────────────────────────────────────────
+// ── Disable right-click except on <p> ─────────────────────────────────────────
+document.addEventListener('contextmenu', e => {
+  if (!e.target.closest('p')) e.preventDefault();
+});
 function goTop() {
   document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
   document.body.scrollTo({ top: 0, behavior: 'smooth' });
