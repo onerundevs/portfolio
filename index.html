@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Onerun</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap"/>
+<style>
+
+/* ── Reset ──────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Geist', sans-serif; font-weight: 400; min-height: 100vh; transition: background 0.35s, color 0.35s; overflow-x: hidden; }
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; font-family: inherit; border: none; background: none; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--sky-3); border-radius: 2px; }
+
+/* ── Tokens ─────────────────────────────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg:       #f4f8fc;
+  --bg2:      #eaf3fb;
+  --surf:     #ffffff;
+  --surf2:    #eef5fb;
+  --bdr:      #d0e6f5;
+  --bdr2:     #bee0f7;
+  --tx:       #0f1c2a;
+  --tx2:      #4a6070;
+  --tx3:      #8ca5b5;
+  --sky:      #38bdf8;
+  --sky-2:    #0ea5e9;
+  --sky-3:    #7dd3fc;
+  --sky-4:    #e0f2fe;
+  --sky-5:    #bae6fd;
+  --shadow:   0 2px 24px rgba(14,165,233,0.10);
+  --shadow-lg:0 8px 48px rgba(14,165,233,0.15);
+}
+[data-theme="dark"] {
+  --bg:       #08111a;
+  --bg2:      #0c1822;
+  --surf:     #0f1e2c;
+  --surf2:    #162433;
+  --bdr:      #1e3345;
+  --bdr2:     #254560;
+  --tx:       #e8f4ff;
+  --tx2:      #7aaabf;
+  --tx3:      #3d6070;
+  --sky:      #38bdf8;
+  --sky-2:    #7dd3fc;
+  --sky-3:    #0ea5e9;
+  --sky-4:    #082030;
+  --sky-5:    #0c2d42;
+  --shadow:   0 2px 24px rgba(0,0,0,0.35);
+  --shadow-lg:0 8px 48px rgba(0,0,0,0.5);
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────────── */
+body { background: var(--bg); color: var(--tx); }
+
+/* ── Animations ─────────────────────────────────────────────────────────────── */
+@keyframes fadeUp   { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeIn   { from { opacity:0; } to { opacity:1; } }
+@keyframes slideUp  { from { transform:translateY(100%); } to { transform:translateY(0); } }
+@keyframes slideDown{ from { transform:translateY(0); } to { transform:translateY(calc(100% + 1px)); } }
+@keyframes shimmer  { 0%,100% { opacity:.5; } 50% { opacity:1; } }
+@keyframes drift    { 0%,100% { transform:translate(0,0) scale(1); } 40% { transform:translate(18px,-14px) scale(1.03); } 70% { transform:translate(-12px,10px) scale(.98); } }
+@keyframes drift2   { 0%,100% { transform:translate(0,0) scale(1); } 35% { transform:translate(-20px,16px) scale(1.04); } 65% { transform:translate(14px,-10px) scale(.97); } }
+
+.reveal { animation: fadeUp .55s cubic-bezier(.22,1,.36,1) both; }
+.reveal-1 { animation-delay: .08s; }
+.reveal-2 { animation-delay: .18s; }
+.reveal-3 { animation-delay: .28s; }
+.reveal-4 { animation-delay: .38s; }
+.reveal-5 { animation-delay: .48s; }
+
+/* ── Background orbs ────────────────────────────────────────────────────────── */
+#orbs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(70px); will-change: transform;
+}
+.orb-a {
+  width: 600px; height: 600px; top: -8%; left: -6%;
+  background: radial-gradient(circle, rgba(56,189,248,.16) 0%, rgba(14,165,233,.05) 55%, transparent 76%);
+  animation: drift 22s ease-in-out infinite;
+}
+.orb-b {
+  width: 480px; height: 480px; bottom: -5%; right: -4%;
+  background: radial-gradient(circle, rgba(125,211,252,.13) 0%, rgba(56,189,248,.04) 58%, transparent 80%);
+  animation: drift2 28s ease-in-out infinite;
+}
+[data-theme="dark"] .orb-a { background: radial-gradient(circle, rgba(56,189,248,.10) 0%, rgba(14,165,233,.03) 55%, transparent 76%); }
+[data-theme="dark"] .orb-b { background: radial-gradient(circle, rgba(125,211,252,.08) 0%, rgba(56,189,248,.02) 58%, transparent 80%); }
+
+/* ── Wrapper ─────────────────────────────────────────────────────────────────── */
+#wrapper { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 0 28px 140px; }
+
+/* ── Header ─────────────────────────────────────────────────────────────────── */
+header {
+  padding: 56px 0 0;
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.wordmark {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(2.4rem, 6vw, 3.6rem);
+  font-weight: 400; letter-spacing: -.02em;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--sky-2) 0%, var(--sky) 55%, var(--sky-3) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  user-select: none;
+}
+.header-meta { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.github-link {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 16px; border-radius: 99px;
+  background: var(--surf); border: 1px solid var(--bdr);
+  color: var(--tx2); font-size: 13px; font-weight: 500;
+  transition: all .22s; box-shadow: var(--shadow);
+}
+.github-link:hover {
+  background: var(--sky-2); color: #fff; border-color: var(--sky-2);
+  transform: translateY(-2px); box-shadow: 0 6px 24px rgba(14,165,233,.3);
+}
+.github-link i { font-size: 15px; }
+
+/* ── Divider ─────────────────────────────────────────────────────────────────── */
+.rule {
+  height: 1px; margin: 40px 0;
+  background: linear-gradient(90deg, var(--sky-3) 0%, var(--bdr) 40%, transparent 100%);
+  opacity: .6;
+}
+
+/* ── Intro ───────────────────────────────────────────────────────────────────── */
+.intro { padding: 8px 0 4px; }
+.intro h1 {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 400; line-height: 1.3; letter-spacing: -.01em;
+  color: var(--tx); margin-bottom: 16px;
+}
+.intro h1 em { font-style: italic; color: var(--sky-2); }
+.intro p {
+  font-size: 16px; line-height: 1.75; color: var(--tx2); max-width: 560px;
+}
+
+/* ── Section titles ──────────────────────────────────────────────────────────── */
+.section { margin-top: 64px; }
+.section-label {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--sky-2); margin-bottom: 28px;
+}
+.section-label::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--bdr2), transparent);
+}
+
+/* ── Cards ───────────────────────────────────────────────────────────────────── */
+.card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 520px) { .card-grid { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--surf); border: 1px solid var(--bdr);
+  border-radius: 16px; padding: 22px 24px;
+  transition: all .24s cubic-bezier(.22,1,.36,1);
+  position: relative; overflow: hidden;
+}
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--sky-2), var(--sky-3));
+  opacity: 0; transition: opacity .24s;
+}
+.card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--bdr2); }
+.card:hover::before { opacity: 1; }
+.card-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--sky-4); border: 1px solid var(--bdr2);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+.card-icon i { color: var(--sky-2); font-size: 15px; }
+.card h3 { font-size: 15px; font-weight: 600; color: var(--tx); margin-bottom: 6px; letter-spacing: -.01em; }
+.card p { font-size: 13px; line-height: 1.65; color: var(--tx2); }
+.card-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 500; letter-spacing: .04em;
+  color: var(--sky-2); background: var(--sky-4); border: 1px solid var(--bdr2);
+  border-radius: 6px; padding: 3px 8px; margin-top: 12px;
+}
+
+/* ── Skills list ─────────────────────────────────────────────────────────────── */
+.skill-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.skill-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 14px; border-radius: 99px;
+  background: var(--surf); border: 1px solid var(--bdr);
+  font-size: 13px; font-weight: 400; color: var(--tx2);
+  transition: all .2s;
+}
+.skill-pill i { color: var(--sky-2); font-size: 12px; }
+.skill-pill:hover { background: var(--sky-4); border-color: var(--bdr2); color: var(--sky-2); transform: translateY(-1px); }
+
+/* ── Contact row ─────────────────────────────────────────────────────────────── */
+.contact-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.contact-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; border-radius: 12px;
+  font-size: 14px; font-weight: 500;
+  transition: all .22s; border: 1px solid var(--bdr);
+}
+.contact-btn.primary {
+  background: var(--sky-2); color: #fff; border-color: var(--sky-2);
+  box-shadow: 0 4px 20px rgba(14,165,233,.25);
+}
+.contact-btn.primary:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(14,165,233,.4); filter: brightness(1.08); }
+.contact-btn.ghost { background: var(--surf); color: var(--tx2); }
+.contact-btn.ghost:hover { background: var(--sky-4); border-color: var(--bdr2); color: var(--sky-2); transform: translateY(-2px); }
+
+/* ── Footer bar ──────────────────────────────────────────────────────────────── */
+
+/* Outer shell — never moves, always at same position */
+#footbar-shell {
+  position: fixed; bottom: 22px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  animation: slideUp .5s .6s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* Both states share this pill shape */
+#footbar,
+#footbar-mini {
+  display: flex; align-items: center;
+  background: var(--surf);
+  border: 1px solid var(--bdr);
+  border-radius: 99px;
+  box-shadow: var(--shadow-lg);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* Full bar */
+#footbar {
+  padding: 6px 8px; gap: 0;
+  max-width: 600px;
+  /* collapse: shrink width + fade */
+  transition: max-width .38s cubic-bezier(.22,1,.36,1),
+              padding   .38s cubic-bezier(.22,1,.36,1),
+              opacity   .22s,
+              visibility 0s;
+}
+#footbar.hidden {
+  max-width: 0; padding: 6px 0;
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: max-width .38s cubic-bezier(.22,1,.36,1),
+              padding   .38s cubic-bezier(.22,1,.36,1),
+              opacity   .22s,
+              visibility 0s .38s;
+}
+
+/* Mini pill — shown when full bar is hidden */
+#footbar-mini {
+  padding: 7px 10px; gap: 4px;
+  position: absolute; top: 0; left: 50%;
+  transform: translateX(-50%);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity .22s, visibility 0s .22s;
+}
+#footbar-mini.visible {
+  opacity: 1; visibility: visible; pointer-events: all;
+  transition: opacity .22s .2s, visibility 0s .2s;
+}
+
+.fb-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 14px; border-radius: 99px;
+  font-size: 13px; font-weight: 500; color: var(--tx2);
+  transition: all .18s; border: 1px solid transparent;
+  flex-shrink: 0;
+}
+.fb-btn:hover { background: var(--sky-4); color: var(--sky-2); border-color: var(--bdr2); }
+.fb-btn i { font-size: 13px; }
+.fb-btn.icon-only { padding: 8px 10px; }
+
+.fb-sep { width: 1px; height: 22px; background: var(--bdr); margin: 0 2px; flex-shrink: 0; }
+
+.fb-toggle-wrap { display: flex; align-items: center; gap: 2px; padding: 2px; background: var(--bg2); border-radius: 99px; border: 1px solid var(--bdr); flex-shrink: 0; }
+.fb-toggle {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; color: var(--tx3); transition: all .2s;
+}
+.fb-toggle.on { background: var(--surf); color: var(--sky-2); box-shadow: 0 1px 6px rgba(0,0,0,.12); }
+.fb-toggle:hover:not(.on) { color: var(--tx2); }
+
+/* ── Stat row ────────────────────────────────────────────────────────────────── */
+.stat-row { display: flex; gap: 0; border: 1px solid var(--bdr); border-radius: 16px; overflow: hidden; background: var(--surf); }
+.stat-item { flex: 1; padding: 20px 22px; text-align: center; border-right: 1px solid var(--bdr); min-width: 0; }
+.stat-item:last-child { border-right: none; }
+.stat-num { font-family: 'Instrument Serif', serif; font-size: 2rem; color: var(--sky-2); line-height: 1; margin-bottom: 4px; transition: opacity .3s; }
+.stat-lbl { font-size: 12px; color: var(--tx3); letter-spacing: .04em; }
+@media (max-width: 480px) { .stat-row { flex-direction: column; } .stat-item { border-right: none; border-bottom: 1px solid var(--bdr); } .stat-item:last-child { border-bottom: none; } }
+
+@keyframes loadpulse { 0%,100% { opacity:.25; } 50% { opacity:.7; } }
+.stat-loading {
+  display: inline-block; width: 28px; height: 6px; border-radius: 3px;
+  background: var(--sky-3); animation: loadpulse 1.2s ease-in-out infinite;
+}
+
+/* ── Subtle line accent ──────────────────────────────────────────────────────── */
+.accent-line {
+  display: inline-block;
+  border-bottom: 1.5px solid var(--sky-3);
+  padding-bottom: 1px;
+}
+
+/* ── Typewriter cursor ───────────────────────────────────────────────────────── */
+#tw-cursor {
+  display: inline-block;
+  width: 2px;
+  height: .85em;
+  background: var(--sky-2);
+  border-radius: 1px;
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: tw-blink .72s step-start infinite;
+}
+@keyframes tw-blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+</style>
+</head>
+<body>
+
+<div id="orbs">
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+</div>
+
+<div id="wrapper">
+
+  <!-- Header -->
+  <header class="reveal">
+    <div class="wordmark">onerun</div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px;margin-top:10px">
+      <a class="github-link reveal reveal-1" href="https://github.com/onerun" target="_blank" rel="noopener">
+        <i class="fa-brands fa-github"></i>
+        github.com/onerun
+      </a>
+    </div>
+  </header>
+
+  <div class="rule reveal reveal-1"></div>
+
+  <!-- Intro -->
+  <section class="intro reveal reveal-2">
+    <h1>Building things that<br><em><span id="tw-word"></span><span id="tw-cursor" aria-hidden="true"></span></em> to use.</h1>
+    <p>Developer. I write clean code, care about details, and believe software should get out of the way and just work. Open-source whenever possible.</p>
+  </section>
+
+  <!-- Stats -->
+  <section class="section reveal reveal-3">
+    <div class="stat-row">
+      <div class="stat-item">
+        <div class="stat-num" id="stat-followers"><span class="stat-loading"></span></div>
+        <div class="stat-lbl">followers</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="stat-repos"><span class="stat-loading"></span></div>
+        <div class="stat-lbl">repositories</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="stat-lastrepo"><span class="stat-loading"></span></div>
+        <div class="stat-lbl">last online</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects -->
+  <section class="section reveal reveal-3">
+    <div class="section-label"><i class="fa-solid fa-code-branch"></i> Projects</div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon"><i class="fa-solid fa-bolt"></i></div>
+        <h3>onerun/core</h3>
+        <p>The foundation. Lightweight runtime utilities built for speed and simplicity.</p>
+        <span class="card-tag"><i class="fa-brands fa-github"></i> View on GitHub</span>
+      </div>
+      <div class="card">
+        <div class="card-icon"><i class="fa-solid fa-terminal"></i></div>
+        <h3>CLI Tools</h3>
+        <p>Command-line utilities that do one thing exceptionally well.</p>
+        <span class="card-tag"><i class="fa-brands fa-github"></i> View on GitHub</span>
+      </div>
+      <div class="card">
+        <div class="card-icon"><i class="fa-solid fa-layer-group"></i></div>
+        <h3>Configs & Dotfiles</h3>
+        <p>A carefully maintained set of configs for a distraction-free dev environment.</p>
+        <span class="card-tag"><i class="fa-brands fa-github"></i> View on GitHub</span>
+      </div>
+      <div class="card">
+        <div class="card-icon"><i class="fa-solid fa-flask"></i></div>
+        <h3>Experiments</h3>
+        <p>Side projects, prototypes, and things built purely out of curiosity.</p>
+        <span class="card-tag"><i class="fa-brands fa-github"></i> View on GitHub</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills -->
+  <section class="section reveal reveal-4">
+    <div class="section-label"><i class="fa-solid fa-cube"></i> Stack</div>
+    <div class="skill-list">
+      <span class="skill-pill"><i class="fa-brands fa-js"></i> JavaScript</span>
+      <span class="skill-pill"><i class="fa-brands fa-python"></i> Python</span>
+      <span class="skill-pill"><i class="fa-brands fa-rust" style="font-family:var(--fa);"></i><i class="fa-solid fa-gear"></i> Rust</span>
+      <span class="skill-pill"><i class="fa-brands fa-node-js"></i> Node.js</span>
+      <span class="skill-pill"><i class="fa-solid fa-database"></i> SQL</span>
+      <span class="skill-pill"><i class="fa-brands fa-linux"></i> Linux</span>
+      <span class="skill-pill"><i class="fa-brands fa-docker"></i> Docker</span>
+      <span class="skill-pill"><i class="fa-brands fa-git-alt"></i> Git</span>
+      <span class="skill-pill"><i class="fa-solid fa-cloud"></i> Cloud</span>
+      <span class="skill-pill"><i class="fa-solid fa-lock"></i> Security</span>
+    </div>
+  </section>
+
+  <!-- Philosophy -->
+  <section class="section reveal reveal-4">
+    <div class="section-label"><i class="fa-solid fa-feather"></i> Approach</div>
+    <div style="display:grid;gap:12px;">
+      <div style="padding:20px 22px;background:var(--surf);border:1px solid var(--bdr);border-radius:14px;display:flex;gap:16px;align-items:flex-start;transition:border-color .2s;" onmouseenter="this.style.borderColor='var(--bdr2)'" onmouseleave="this.style.borderColor='var(--bdr)'">
+        <div style="width:32px;height:32px;border-radius:9px;background:var(--sky-4);border:1px solid var(--bdr2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px"><i class="fa-solid fa-minimize" style="color:var(--sky-2);font-size:12px"></i></div>
+        <div><p style="font-size:14px;font-weight:600;color:var(--tx);margin-bottom:5px;letter-spacing:-.01em">Less, but better</p><p style="font-size:13px;line-height:1.7;color:var(--tx2)">Every line of code is a liability. The best solution is usually the simplest one that actually works.</p></div>
+      </div>
+      <div style="padding:20px 22px;background:var(--surf);border:1px solid var(--bdr);border-radius:14px;display:flex;gap:16px;align-items:flex-start;transition:border-color .2s;" onmouseenter="this.style.borderColor='var(--bdr2)'" onmouseleave="this.style.borderColor='var(--bdr)'">
+        <div style="width:32px;height:32px;border-radius:9px;background:var(--sky-4);border:1px solid var(--bdr2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px"><i class="fa-solid fa-arrow-up-right-from-square" style="color:var(--sky-2);font-size:12px"></i></div>
+        <div><p style="font-size:14px;font-weight:600;color:var(--tx);margin-bottom:5px;letter-spacing:-.01em">Ship and iterate</p><p style="font-size:13px;line-height:1.7;color:var(--tx2)">Perfect is the enemy of shipped. Get it out, watch it run, make it better.</p></div>
+      </div>
+      <div style="padding:20px 22px;background:var(--surf);border:1px solid var(--bdr);border-radius:14px;display:flex;gap:16px;align-items:flex-start;transition:border-color .2s;" onmouseenter="this.style.borderColor='var(--bdr2)'" onmouseleave="this.style.borderColor='var(--bdr)'">
+        <div style="width:32px;height:32px;border-radius:9px;background:var(--sky-4);border:1px solid var(--bdr2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px"><i class="fa-brands fa-osi" style="color:var(--sky-2);font-size:12px"></i></div>
+        <div><p style="font-size:14px;font-weight:600;color:var(--tx);margin-bottom:5px;letter-spacing:-.01em">Open by default</p><p style="font-size:13px;line-height:1.7;color:var(--tx2)">Code should be readable, forkable, and improvable by anyone who needs it.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="section reveal reveal-5">
+    <div class="section-label"><i class="fa-solid fa-paper-plane"></i> Connect</div>
+    <p style="font-size:15px;color:var(--tx2);line-height:1.7;margin-bottom:24px;max-width:500px">
+      Find all my work on GitHub. Pull requests and issues welcome — open source thrives on collaboration.
+    </p>
+    <div class="contact-row">
+      <a class="contact-btn primary" href="https://github.com/onerun" target="_blank" rel="noopener">
+        <i class="fa-brands fa-github"></i> github.com/onerun
+      </a>
+      <a class="contact-btn ghost" href="https://github.com/onerun?tab=repositories" target="_blank" rel="noopener">
+        <i class="fa-solid fa-box-archive"></i> Repositories
+      </a>
+    </div>
+  </section>
+
+  <!-- Foot spacing -->
+  <div style="height:40px"></div>
+
+</div><!-- /wrapper -->
+
+<!-- Footer bar shell — never moves -->
+<div id="footbar-shell">
+
+  <!-- Full bar -->
+  <div id="footbar">
+    <a class="fb-btn" href="https://github.com/onerun" target="_blank" rel="noopener" title="GitHub">
+      <i class="fa-brands fa-github"></i>
+      <span>GitHub</span>
+    </a>
+    <div class="fb-sep"></div>
+    <button class="fb-btn" onclick="scrollTop()" title="Back to top">
+      <i class="fa-solid fa-arrow-up"></i>
+      <span>Top</span>
+    </button>
+    <div class="fb-sep"></div>
+    <div class="fb-toggle-wrap" title="Toggle theme">
+      <button class="fb-toggle" id="btn-light" onclick="setTheme('light')" title="Light mode">
+        <i class="fa-solid fa-sun"></i>
+      </button>
+      <button class="fb-toggle" id="btn-dark" onclick="setTheme('dark')" title="Dark mode">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+    </div>
+    <div class="fb-sep"></div>
+    <button class="fb-btn icon-only" onclick="hideBar()" title="Collapse toolbar">
+      <i class="fa-solid fa-chevron-down"></i>
+    </button>
+  </div>
+
+  <!-- Mini pill — same spot, shown when collapsed -->
+  <div id="footbar-mini">
+    <button class="fb-btn icon-only" onclick="scrollTop()" title="Back to top">
+      <i class="fa-solid fa-arrow-up"></i>
+    </button>
+    <div class="fb-sep"></div>
+    <button class="fb-btn icon-only" onclick="showBar()" title="Expand toolbar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+
+</div>
+
+<script>
+// ── Theme ──────────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'onerun-theme';
+
+function getInitialTheme() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved === 'light' || saved === 'dark') return saved;
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
+  return 'light';
+}
+
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem(STORAGE_KEY, theme);
+  document.getElementById('btn-light').classList.toggle('on', theme === 'light');
+  document.getElementById('btn-dark').classList.toggle('on', theme === 'dark');
+}
+
+setTheme(getInitialTheme());
+
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+  if (!localStorage.getItem(STORAGE_KEY)) setTheme(e.matches ? 'dark' : 'light');
+});
+
+// ── Footbar ────────────────────────────────────────────────────────────────────
+const bar  = document.getElementById('footbar');
+const mini = document.getElementById('footbar-mini');
+
+function hideBar() {
+  bar.classList.add('hidden');
+  mini.classList.add('visible');
+}
+function showBar() {
+  mini.classList.remove('visible');
+  bar.classList.remove('hidden');
+}
+
+// ── Scroll to top ──────────────────────────────────────────────────────────────
+function scrollTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+// ── Project cards → GitHub ─────────────────────────────────────────────────────
+document.querySelectorAll('.card').forEach(card => {
+  card.style.cursor = 'pointer';
+  card.addEventListener('click', () => window.open('https://github.com/onerun', '_blank', 'noopener'));
+});
+
+// ── GitHub live stats ──────────────────────────────────────────────────────────
+const GH_USER = 'onerun';
+const GH_API        = `https://api.github.com/users/${GH_USER}`;
+
+const elFollowers = document.getElementById('stat-followers');
+const elRepos     = document.getElementById('stat-repos');
+const elLastRepo  = document.getElementById('stat-lastrepo');
+
+// Animate a number counting up to a target value
+function animateCount(el, target) {
+  const current = parseInt(el.dataset.current || '0', 10);
+  if (current === target) return;
+  const diff     = target - current;
+  const steps    = Math.min(Math.abs(diff), 20);
+  const stepVal  = diff / steps;
+  const interval = 60;
+  let count = current;
+  let step  = 0;
+  const ticker = setInterval(() => {
+    step++;
+    count += stepVal;
+    el.textContent = Math.round(step < steps ? count : target);
+    if (step >= steps) { clearInterval(ticker); el.dataset.current = target; }
+  }, interval);
+}
+
+// Crossfade text (for repo name)
+function fadeText(el, text) {
+  if (el.textContent === text) return;
+  el.style.opacity = '0';
+  setTimeout(() => {
+    el.textContent = text;
+    el.style.opacity = '1';
+    el.dataset.current = text;
+  }, 300);
+}
+
+// Relative time formatter
+function timeAgo(dateStr) {
+  const secs = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+  if (secs < 60)               return secs + 's ago';
+  if (secs < 3600)             return Math.floor(secs / 60) + 'm ago';
+  if (secs < 86400)            return Math.floor(secs / 3600) + 'h ago';
+  if (secs < 86400 * 30)       return Math.floor(secs / 86400) + 'd ago';
+  if (secs < 86400 * 365)      return Math.floor(secs / (86400 * 30)) + 'mo ago';
+  return Math.floor(secs / (86400 * 365)) + 'y ago';
+}
+
+async function fetchStats() {
+  try {
+    const userRes = await fetch(GH_API, { headers: { 'Accept': 'application/vnd.github+json' } });
+
+    if (userRes.ok) {
+      const user = await userRes.json();
+      animateCount(elFollowers, user.followers ?? 0);
+      animateCount(elRepos,     user.public_repos ?? 0);
+      if (user.updated_at) fadeText(elLastRepo, timeAgo(user.updated_at));
+    }
+  } catch (err) {
+    console.warn('GitHub API fetch failed:', err);
+  }
+}
+
+// ── Typewriter ─────────────────────────────────────────────────────────────────
+(function () {
+  const WORDS        = ['Feel right', 'Work right', 'Are right', 'Are useful', 'Are beneficial', 'Are legit'];
+  const TYPE_SPEED   = 72;   // ms per character typed
+  const DELETE_SPEED = 38;   // ms per character deleted
+  const PAUSE_AFTER  = 1800; // ms to hold the full word
+  const PAUSE_EMPTY  = 320;  // ms to pause when empty before typing next
+
+  const wordEl   = document.getElementById('tw-word');
+  let wordIdx    = 0;
+  let charIdx    = 0;
+  let deleting   = false;
+
+  function tick() {
+    const target = WORDS[wordIdx];
+
+    if (!deleting) {
+      // Type forward
+      charIdx++;
+      wordEl.textContent = target.slice(0, charIdx);
+      if (charIdx === target.length) {
+        // Finished typing — pause then start deleting
+        deleting = true;
+        setTimeout(tick, PAUSE_AFTER);
+        return;
+      }
+      setTimeout(tick, TYPE_SPEED);
+    } else {
+      // Delete backward
+      charIdx--;
+      wordEl.textContent = target.slice(0, charIdx);
+      if (charIdx === 0) {
+        // Finished deleting — move to next word
+        deleting = false;
+        wordIdx  = (wordIdx + 1) % WORDS.length;
+        setTimeout(tick, PAUSE_EMPTY);
+        return;
+      }
+      setTimeout(tick, DELETE_SPEED);
+    }
+  }
+
+  // Kick off after the reveal animation settles
+  setTimeout(tick, 900);
+})();
+</script>
+</body>
+</html>
