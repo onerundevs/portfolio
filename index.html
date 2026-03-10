@@ -476,7 +476,7 @@ header {
       <span>GitHub</span>
     </a>
     <div class="fb-sep"></div>
-    <button class="fb-btn" onclick="scrollTop()" title="Back to top">
+    <button class="fb-btn" onclick="goTop()" title="Back to top">
       <i class="fa-solid fa-arrow-up"></i>
       <span>Top</span>
     </button>
@@ -497,7 +497,7 @@ header {
 
   <!-- Mini pill — same spot, shown when collapsed -->
   <div id="footbar-mini">
-    <button class="fb-btn icon-only" onclick="scrollTop()" title="Back to top">
+    <button class="fb-btn icon-only" onclick="goTop()" title="Back to top">
       <i class="fa-solid fa-arrow-up"></i>
     </button>
     <div class="fb-sep"></div>
@@ -546,7 +546,7 @@ function showBar() {
 }
 
 // ── Scroll to top ──────────────────────────────────────────────────────────────
-function scrollTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function goTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
 // ── Project cards → GitHub ─────────────────────────────────────────────────────
 document.querySelectorAll('.card').forEach(card => {
